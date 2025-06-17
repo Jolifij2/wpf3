@@ -1,0 +1,34 @@
+//cs2
+using System;
+using System.Windows;
+
+namespace CalendarApp
+{
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+
+        private void MyCalendar_SelectedDatesChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (myCalendar.SelectedDate.HasValue)
+            {
+                DateTime selectedDate = myCalendar.SelectedDate.Value;
+
+                dayTextBox.Text = selectedDate.Day.ToString();
+                monthTextBox.Text = selectedDate.Month.ToString();
+                yearTextBox.Text = selectedDate.Year.ToString();
+                fullDateTextBlock.Text = $"Дата Дня рождения: {selectedDate.ToLongDateString()}";
+            }
+            else
+            {
+                dayTextBox.Text = "";
+                monthTextBox.Text = "";
+                yearTextBox.Text = "";
+                fullDateTextBlock.Text = "";
+            }
+        }
+    }
+}
