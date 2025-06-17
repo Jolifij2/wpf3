@@ -1,0 +1,36 @@
+//haml2
+<Window x:Class="CalendarApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Calendar App" Height="450" Width="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Calendar x:Name="myCalendar" Grid.Row="0" Margin="10"
+                  SelectionMode="SingleDate"
+                  SelectedDatesChanged="MyCalendar_SelectedDatesChanged"/>
+
+        <Label Grid.Row="1" Content="Выбранная дата:" Margin="10,0,10,0"/>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10,5">
+            <Label Content="День:" Margin="0,0,5,0"/>
+            <TextBox x:Name="dayTextBox" Width="50" IsReadOnly="True"/>
+
+            <Label Content="Месяц:" Margin="10,0,5,0"/>
+            <TextBox x:Name="monthTextBox" Width="50" IsReadOnly="True"/>
+
+            <Label Content="Год:" Margin="10,0,5,0"/>
+            <TextBox x:Name="yearTextBox" Width="70" IsReadOnly="True"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="3" x:Name="fullDateTextBlock" Margin="10,10" TextWrapping="Wrap"/>
+    </Grid>
+</Window>
