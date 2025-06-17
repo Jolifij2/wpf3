@@ -1,0 +1,185 @@
+//cs
+using System;
+using System.IO;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Controls;
+
+namespace PersonalInfoApp
+{
+    // Data class to represent personal information
+    public class PersonalInfo
+    {
+        public string LastName { get; set; }
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+        public string Gender { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public string MaritalStatus { get; set; }
+        public string AdditionalInfo { get; set; }
+    }
+
+    public partial class MainWindow : Window
+    {
+        private string dataFilePath = "personal_info.json"; // Use JSON for structured data
+        private bool editingMode = false;
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            maritalStatusComboBox.SelectedIndex = 0;
+            LoadData();
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Collect data from UI elements
+            PersonalInfo info = new PersonalInfo
+            {
+                LastName = lastNameTextBox.Text,
+                FirstName = firstNameTextBox.Text,
+                MiddleName = middleNameTextBox.Text,
+                Gender = maleRadioButton.IsChecked == true ? "Мужской" : "Женский",
+                BirthDate = birthDatePicker.SelectedDate,
+                MaritalStatus = (maritalStatusComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "",
+                AdditionalInfo = additionalInfoTextBox.Text
+            };
+
+            if (!ValidateData(info)) return; // Stop if validation fails
+
+            // Save data to JSON file
+            try
+            {
+                string jsonString = JsonSerializer.Serialize(info);
+                File.WriteAllText(dataFilePath, jsonString);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении данных: {ex.Message}");
+                return;
+            }
+
+            editingMode = false;
+            saveButton.IsEnabled = false;
+            editButton.IsEnabled = true;
+            LockInputFields(true);
+            UpdateDisplay();
+        }
+
+        private bool ValidateData(PersonalInfo info)
+        {
+            if (string.IsNullOrEmpty(info.LastName) || string.IsNullOrEmpty(info.FirstName) || string.IsNullOrEmpty(info.MiddleName) || info.BirthDate == null || string.IsNullOrEmpty(info.MaritalStatus))
+            {
+                MessageBox.Show("Пожалуйста, заполните все обязательные поля.");
+                return false;
+            }
+            return true;
+        }
+
+        private void EditButton_Click(object sender, RoutedEventArgs e)
+        {
+            editingMode = true;
+            saveButton.IsEnabled = true;
+            editButton.IsEnabled = false;
+            LockInputFields(false);
+        }
+
+        private void LoadData()
+        {
+            if (File.Exists(dataFilePath))
+            {
+                try
+                {
+                    string jsonString = File.ReadAllText(dataFilePath);
+                    PersonalInfo info = JsonSerializer.Deserialize<PersonalInfo>(jsonString);
+
+                    if (info != null)
+                    {
+                        lastNameTextBox.Text = info.LastName;
+                        firstNameTextBox.Text = info.FirstName;
+                        middleNameTextBox.Text = info.MiddleName;
+                        if (info.Gender == "Мужской")
+                        {
+                            maleRadioButton.IsChecked = true;
+                        }
+                        else
+                        {
+                            femaleRadioButton.IsChecked = true;
+                        }
+                        birthDatePicker.SelectedDate = info.BirthDate;
+
+                        foreach (ComboBoxItem item in maritalStatusComboBox.Items)
+                        {
+                            if (item.Content.ToString() == info.MaritalStatus)
+                            {
+                                maritalStatusComboBox.SelectedItem = item;
+                                break;
+                            }
+                        }
+
+                        additionalInfoTextBox.Text = info.AdditionalInfo;
+
+                        saveButton.IsEnabled = false;
+                        editButton.IsEnabled = true;
+                        LockInputFields(true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при загрузке данных: {ex.Message}");
+                }
+            }
+            else
+            {
+                saveButton.IsEnabled = true;
+                editButton.IsEnabled = false;
+                LockInputFields(false);
+            }
+
+            UpdateDisplay();
+        }
+
+        private void UpdateDisplay()
+        {
+            if (File.Exists(dataFilePath))
+            {
+                try
+                {
+                    string jsonString = File.ReadAllText(dataFilePath);
+                    PersonalInfo info = JsonSerializer.Deserialize<PersonalInfo>(jsonString);
+
+                    if (info != null)
+                    {
+                        displayTextBlock.Text = $"Фамилия: {info.LastName}\n" +
+                                               $"Имя: {info.FirstName}\n" +
+                                               $"Отчество: {info.MiddleName}\n" +
+                                               $"Пол: {info.Gender}\n" +
+                                               $"Дата рождения: {info.BirthDate?.ToShortDateString()}\n" +
+                                               $"Семейный статус: {info.MaritalStatus}\n" +
+                                               $"Дополнительная информация: {info.AdditionalInfo}";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при отображении данных: {ex.Message}");
+                }
+            }
+            else
+            {
+                displayTextBlock.Text = "Информация отсутствует. Заполните и сохраните данные.";
+            }
+        }
+
+        private void LockInputFields(bool locked)
+        {
+            lastNameTextBox.IsEnabled = !locked;
+            firstNameTextBox.IsEnabled = !locked;
+            middleNameTextBox.IsEnabled = !locked;
+            maleRadioButton.IsEnabled = !locked;
+            femaleRadioButton.IsEnabled = !locked;
+            birthDatePicker.IsEnabled = !locked;
+            maritalStatusComboBox.IsEnabled = !locked;
+            additionalInfoTextBox.IsEnabled = !locked;
+        }
+    }
+}
